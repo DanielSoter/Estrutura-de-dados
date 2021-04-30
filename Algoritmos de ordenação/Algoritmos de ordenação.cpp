@@ -3,40 +3,33 @@
 #include <time.h>
 using namespace std;
 
-
-
 //Selection
-// 256 =  1 MB (0 segundos)
-// 262.144 =  1 GB (141 segundos)
-// 13.107.200 = 50 GB (Inviável)
+// 256 =  1 KB (0 segundos)
+// 262.144 =  1 MB (141 segundos)
+// 13.107.200 = 50 MB (Inviável)
 
 //Insertion
-// 256 =  1 MB (0 segundos)
-// 262.144 =  1 GB (150 segundos)
-// 13.107.200 = 50 GB (Inviável)
+// 256 =  1 KB (0 segundos)
+// 262.144 =  1 MB (150 segundos)
+// 13.107.200 = 50 MB (Inviável)
 
 //Bubble
-// 256 =  1 MB (0 segundos)
-// 262.144 =  1 GB (328 segundos)
-// 13.107.200 = 50 GB (Inviável)
+// 256 =  1 KB (0 segundos)
+// 262.144 =  1 MB (328 segundos)
+// 13.107.200 = 50 MB (Inviável)
 
 //Quick
-// 256 =  1 MB (0 segundos)
-// 262.144 =  1 GB (0 segundos)
-// 13.107.200 = 50 GB (10 segundos) 0,1 processador 1 teste
-// 13.107.200 = 50 GB (09 segundos) 0,0 processador 2 teste
+// 256 =  1 KB (0 segundos)
+// 262.144 =  1 MB (0 segundos)
+// 13.107.200 = 50 MB (10 segundos) 0,1 processador 1 teste
+// 13.107.200 = 50 MB (09 segundos) 0,0 processador 2 teste
 
 //Merge
-// 256 =  1 MB (0 segundos)
-// 262.144 =  1 GB (0 segundos)
-// 393.216 = 1,5 GB (1 segundo) 0,0 processador 
-
-// 524.288 = 2 GB (trava) 0,4 processador 
-// 1.310.720 =  5 GB (Trava) 0,5 processador 
-// 2.621.440 =  10 GB (Trava) 0,7 processador  
-// 13.107.200 = 50 GB (Trava) 1,7 processador 
-// OBS: No debug ele simplesmente sai sem ordenar nos casos em que o algoritmo travou
-
+// 256 =  1 KB (0 segundos)
+// 262.144 =  1 MB (0 segundos)
+// 393.216 = 1,5 MB (1 segundo) 0,0 processador 
+// 13.107.200 = 50 MB (07 segundos) 1,7 processador
+// 268.435.456 = 1GB ( segundos)
 
 void preencheVetor(int *vet, int size){
     for (int i = 0; i < size; ++i) {
@@ -137,118 +130,91 @@ void ordenarQuicksort(int *v, int esquerda, int direita)
   ordenarQuicksort(v, divide + 1, direita);   
 }
 
-void merge(int *vet, int start, int m, int end)
-{
+    
+/* intercala os vetores v[esq..meio] e v[meio+1..dir] */
+void mergeSort_intercala(int *v, int esq, int meio, int dir) {
     int i, j, k;
-    int n1 = m - start + 1;
-    int n2 = end - m;
+    int a_tam = meio-esq+1;
+    int b_tam = dir-meio;
+    int *a = (int*) malloc(sizeof(int) * a_tam);
+    int *b = (int*) malloc(sizeof(int) * b_tam);
+    for (i = 0; i < a_tam; i++) a[i] = v[i+esq];
+    for (i = 0; i < b_tam; i++) b[i] = v[i+meio+1];
 
-    int vetTemp1[n1], vetTemp2[n2];
-
-    for (i = 0; i < n1; i++)
-        vetTemp1[i] = vet[start + i];
-    for (j = 0; j < n2; j++)
-        vetTemp2[j] = vet[m + 1 + j];
-
-    i = 0;
-    j = 0;
-    k = start;
-
-    while (i < n1 && j < n2)
-    {
-        if (vetTemp1[i] <= vetTemp2[j])
-        {
-            vet[k] = vetTemp1[i];
-            i++;
-        }
-        else
-        {
-            vet[k] = vetTemp2[j];
-            j++;
-        }
-        k++;
+    for (i = 0, j = 0, k = esq; k <= dir; k++) {
+    if (i == a_tam) v[k] = b[j++];
+    else if (j == b_tam) v[k] = a[i++];
+    else if (a[i] < b[j]) v[k] = a[i++];
+    else v[k] = b[j++];
     }
-
-    while (i < n1)
-    {
-        vet[k] = vetTemp1[i];
-        i++;
-        k++;
-    }
-
-    while (j < n2)
-    {
-        vet[k] = vetTemp2[j];
-        j++;
-        k++;
-    }
+    free(a); free(b);
 }
 
-void mergeSort(int *vet, int start, int end)
-{
-    if (start < end)
-    {
-        int m = start + (end - start) / 2;
+/* ordena o vetor v[esq..dir] */
+    void mergeSort_ordena(int *v, int esq, int dir) {
+    if (esq == dir)
+    return;
 
-        mergeSort(vet, start, m);
-        mergeSort(vet, m + 1, end);
-        merge(vet, start, m, end);
-    }
+    int meio = (esq + dir) / 2;
+    mergeSort_ordena(v, esq, meio);
+    mergeSort_ordena(v, meio+1, dir);
+    mergeSort_intercala(v, esq, meio, dir);
+    return;
 }
+
+/* ordena o vetor v[0..n-1] */
+void mergeSort(int *v, int n) {
+    mergeSort_ordena(v, 0, n-1);
+
+    }
+
+//Algoritmos desenvolvidos para testes, não é recomentado executar todos os algoritmos sort de uma vez.
 
 int main() {
 
-    int *vet, *vet1, *vet2, *vet3, *vet4, aux, size;
+    int *vet, aux, size;
 
     cout << "Informe um valor para dimensionar o vetor: " << endl;
     cin >> size;
 
     vet = (int *) malloc(size * sizeof (int)); 
-    vet1 = (int *) malloc(size * sizeof (int));
-    vet2 = (int *) malloc(size * sizeof (int));
-    vet3 = (int *) malloc(size * sizeof (int));
-    vet4 = (int *) malloc(size * sizeof (int));
-    preencheVetor(vet, size);
-    preencheVetor(vet1, size);
-    preencheVetor(vet2, size);
-    preencheVetor(vet3, size);
-    preencheVetor(vet4, size);
 
+    /*preencheVetor(vet, size);
     time_t start_i = time(NULL);
     insertionSort(vet, size, aux);
     time_t diff_i = time(NULL) - start_i;
     free(vet);
 
+    preencheVetor(vet, size);
     time_t start_s = time(NULL);
-    selectionSort(vet1, size, aux);
+    selectionSort(vet, size, aux);
     time_t diff_s = time(NULL) - start_s;
-    free(vet1);
+    free(vet);
 
+    preencheVetor(vet, size);
     time_t start_b = time(NULL);
-    bubbleSort(vet2, size, aux);
+    bubbleSort(vet, size, aux);
     time_t diff_b = time(NULL) - start_b;
-    free(vet2);
+    free(vet);
 
+    preencheVetor(vet, size);
     time_t start_q = time(NULL);
-    ordenarQuicksort(vet3, 0, size);
+    ordenarQuicksort(vet, 0, size);
     time_t diff_q = time(NULL) - start_q;
-    free(vet3);
+    free(vet);*/
 
-
+    preencheVetor(vet, size);
     time_t start_m = time(NULL);
-    mergeSort(vet4, 0, size - 1);
+    mergeSort(vet, size - 1);
     time_t diff_m = time(NULL) - start_m;
-    free(vet4);
+    free(vet);
 
-    
-
-    cout << "Tempo em segundos algoritmo de ordenacao Insertion: " << diff_i << endl;
+    /*cout << "Tempo em segundos algoritmo de ordenacao Insertion: " << diff_i << endl;
     cout << "Tempo em segundos algoritmo de ordenacao Selection: " << diff_s << endl;
     cout << "Tempo em segundos algoritmo de ordenacao Bubble: " << diff_b << endl;
-    cout << "Tempo em segundos algoritmo de ordenacao Quick: " << diff_q << endl;
+    cout << "Tempo em segundos algoritmo de ordenacao Quick: " << diff_q << endl;*/
     cout << "Tempo em segundos algoritmo de ordenacao Merge: " << diff_m << endl;
 
-    
     system("pause");
     return 0;
 
